@@ -40,7 +40,7 @@ const mine = new Command()
   .env("OGMIOS_URL=<value:string>", "Ogmios URL", { required: true })
   .option("-p, --preview", "Use testnet")
   .action(async ({ preview, ogmiosUrl, kupoUrl }) => {
-    const postMineTx = async function(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress) {
+    const postMineTx = async function(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo) {
       const realTimeNow = Number((Date.now() / 1000).toFixed(0)) * 1000 - 60000;
 
       const interlink = calculateInterlink(toHex(targetHash), difficulty, {
@@ -93,12 +93,6 @@ const mine = new Command()
       const mintTokens = { [validatorHash + fromText("TUNA")]: 5000000000n };
       const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
 
-      const readUtxo = await lucid.utxosByOutRef([{
-        txHash:
-        "44732090c80e3c80f99e91f66fbbf5512c605d865276011089985517e0c7cf56",
-        outputIndex: 0,
-      }]);
-
       const txMine = await lucid
       .newTx()
       .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
@@ -131,6 +125,11 @@ const mine = new Command()
     const lucid = await Lucid.new(provider, preview ? "Preview" : "Mainnet");
 
     lucid.selectWalletFromSeed(Deno.readTextFileSync("seed.txt"));
+
+    const readUtxo = await lucid.utxosByOutRef([{
+      txHash: "01751095ea408a3ebe6083b4de4de8a24b635085183ab8a2ac76273ef8fff5dd",
+      outputIndex: 0,
+    }]);
 
     let lastBlockCheck = new Date();
 
@@ -219,7 +218,7 @@ const mine = new Command()
         (leadingZeros == (state.fields[2] as bigint) &&
           difficulty_number < (state.fields[3] as bigint))
       ) {
-        await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress);
+        await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo);
       }
 
       incrementU8Array(nonce);
