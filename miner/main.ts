@@ -124,6 +124,8 @@ const mine = new Command()
                 state.fields[4] as bigint,
              ]);
          }
+
+         lastBlockCheck = new Date();
       }
         
       targetHash = sha256(sha256(fromHex(Data.to(targetState))));
