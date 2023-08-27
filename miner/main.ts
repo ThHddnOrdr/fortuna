@@ -104,7 +104,10 @@ const mine = new Command()
             string | bigint | string[]
          >;
 
-         if (state.fields[0] != targetState.fields[0]) {
+         console.log("Current state block: " + state.fields[0]);
+         console.log("Target state block: " + targetState.fields[0]);
+
+         if (state.fields[0] + 1 != targetState.fields[0]) {
             console.log("New block detected...");
 
             crypto.getRandomValues(nonce);
