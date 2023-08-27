@@ -44,7 +44,7 @@ const mine = new Command()
       `genesis/${preview ? "preview" : "mainnet"}.json`,
     );
 
-    const { validatorHash, validatorAddress }: Genesis = JSON.parse(
+    const { validator, validatorHash, validatorAddress }: Genesis = JSON.parse(
       genesisFile,
     );
 
@@ -201,18 +201,12 @@ const mine = new Command()
     const mintTokens = { [validatorHash + fromText("TUNA")]: 5000000000n };
     const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
 
-    const readUtxo = await lucid.utxosByOutRef([{
-      txHash:
-        "44732090c80e3c80f99e91f66fbbf5512c605d865276011089985517e0c7cf56",
-      outputIndex: 0,
-    }]);
-
     const txMine = await lucid
       .newTx()
       .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
       .payToAddressWithData(validatorAddress, { inline: outDat }, masterToken)
       .mintAssets(mintTokens, Data.to(new Constr(0, [])))
-      .readFrom(readUtxo)
+      .attachSpendingValidator({ type: "PlutusV2", script: validator })
       .validTo(realTimeNow + 180000)
       .validFrom(realTimeNow)
       .complete();
