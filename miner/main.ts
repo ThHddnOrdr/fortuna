@@ -99,16 +99,17 @@ const mine = new Command()
          validatorOutRef = validatorUTXOs.find(
             (u) => u.assets[validatorHash + fromText("lord tuna")],
          )!;
-         validatorState = validatorOutRef.datum!;
-         state = Data.from(validatorState) as Constr<
-            string | bigint | string[]
-         >;
 
-         console.log("Current state block: " + state.fields[0]);
-         console.log("Target state block: " + targetState.fields[0]);
+         console.log("Current datum: " + validatorState);
+         console.log("On-chain datum: " + validatorOutRef.datum!);
 
-         if (state.fields[0] + 1 != targetState.fields[0]) {
+         if (validatorState !== validatorOutRef.datum!) {
             console.log("New block detected...");
+
+            validatorState = validatorOutRef.datum!;
+            state = Data.from(validatorState) as Constr<
+               string | bigint | string[]
+            >;
 
             crypto.getRandomValues(nonce);
 
