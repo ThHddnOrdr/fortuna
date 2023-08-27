@@ -40,7 +40,7 @@ const mine = new Command()
   .env("OGMIOS_URL=<value:string>", "Ogmios URL", { required: true })
   .option("-p, --preview", "Use testnet")
   .action(async ({ preview, ogmiosUrl, kupoUrl }) => {
-    async function postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress) {
+    const postMineTx = async function(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress) {
       const realTimeNow = Number((Date.now() / 1000).toFixed(0)) * 1000 - 60000;
 
       const interlink = calculateInterlink(toHex(targetHash), difficulty, {
