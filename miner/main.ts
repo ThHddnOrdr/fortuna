@@ -219,14 +219,12 @@ const mine = new Command()
         (leadingZeros == (state.fields[2] as bigint) &&
           difficulty_number < (state.fields[3] as bigint))
       ) {
-        break;
+        await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress);
       }
 
       incrementU8Array(nonce);
 
       targetState.fields[0] = toHex(nonce);
-
-      await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress);
     }
   });
 
