@@ -73,8 +73,6 @@ const mine = new Command()
         leading_zeros = new_difficulty.leadingZeros;
       }
 
-      // calculateDifficultyNumber();
-
       const postDatum = new Constr(0, [
         (state.fields[0] as bigint) + 1n,
         toHex(targetHash),
@@ -84,7 +82,7 @@ const mine = new Command()
         BigInt(90000 + realTimeNow),
         0n,
         interlink,
-        ]);
+      ]);
 
       const outDat = Data.to(postDatum);
 
@@ -94,23 +92,20 @@ const mine = new Command()
       const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
 
       const txMine = await lucid
-      .newTx()
-      .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
-      .payToAddressWithData(validatorAddress, { inline: outDat }, masterToken)
-      .mintAssets(mintTokens, Data.to(new Constr(0, [])))
-      .readFrom(readUtxo)
-      .validTo(realTimeNow + 180000)
-      .validFrom(realTimeNow)
-      .complete();
+        .newTx()
+        .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
+        .payToAddressWithData(validatorAddress, { inline: outDat }, masterToken)
+        .mintAssets(mintTokens, Data.to(new Constr(0, [])))
+        .readFrom(readUtxo)
+        .validTo(realTimeNow + 180000)
+        .validFrom(realTimeNow)
+        .complete();
 
       const signed = await txMine.sign().complete();
 
-      await signed.submit();
-
       console.log(`TX HASH: ${signed.toHash()}`);
-      console.log("Waiting for confirmation...");
 
-      await lucid.awaitTx(signed.toHash());
+      await signed.submit();
     }
 
     const genesisFile = Deno.readTextFileSync(
