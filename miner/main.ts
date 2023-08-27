@@ -40,6 +40,85 @@ const mine = new Command()
   .env("OGMIOS_URL=<value:string>", "Ogmios URL", { required: true })
   .option("-p, --preview", "Use testnet")
   .action(async ({ preview, ogmiosUrl, kupoUrl }) => {
+    async function postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress) {
+      const realTimeNow = Number((Date.now() / 1000).toFixed(0)) * 1000 - 60000;
+
+      const interlink = calculateInterlink(toHex(targetHash), difficulty, {
+        leadingZeros: state.fields[2] as bigint,
+        difficulty_number: state.fields[3] as bigint,
+      }, state.fields[7] as string[]);
+
+      let epoch_time = (state.fields[4] as bigint) + BigInt(90000 + realTimeNow) - (state.fields[5] as bigint);
+
+      let difficulty_number = state.fields[3] as bigint;
+      let leading_zeros = state.fields[2] as bigint;
+
+      if (
+        state.fields[0] as bigint % 2016n === 0n && state.fields[0] as bigint > 0
+        ) {
+        const adjustment = getDifficultyAdjustement(epoch_time, 1_209_600_000n);
+
+        epoch_time = 0n;
+
+        const new_difficulty = calculateDifficultyNumber(
+          {
+            leadingZeros: state.fields[2] as bigint,
+            difficulty_number: state.fields[3] as bigint,
+          },
+          adjustment.numerator,
+          adjustment.denominator,
+          );
+
+        difficulty_number = new_difficulty.difficulty_number;
+        leading_zeros = new_difficulty.leadingZeros;
+      }
+
+      // calculateDifficultyNumber();
+
+      const postDatum = new Constr(0, [
+        (state.fields[0] as bigint) + 1n,
+        toHex(targetHash),
+        leading_zeros,
+        difficulty_number,
+        epoch_time,
+        BigInt(90000 + realTimeNow),
+        0n,
+        interlink,
+        ]);
+
+      const outDat = Data.to(postDatum);
+
+      console.log(`Found next datum: ${outDat}`);
+
+      const mintTokens = { [validatorHash + fromText("TUNA")]: 5000000000n };
+      const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
+
+      const readUtxo = await lucid.utxosByOutRef([{
+        txHash:
+        "44732090c80e3c80f99e91f66fbbf5512c605d865276011089985517e0c7cf56",
+        outputIndex: 0,
+      }]);
+
+      const txMine = await lucid
+      .newTx()
+      .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
+      .payToAddressWithData(validatorAddress, { inline: outDat }, masterToken)
+      .mintAssets(mintTokens, Data.to(new Constr(0, [])))
+      .readFrom(readUtxo)
+      .validTo(realTimeNow + 180000)
+      .validFrom(realTimeNow)
+      .complete();
+
+      const signed = await txMine.sign().complete();
+
+      await signed.submit();
+
+      console.log(`TX HASH: ${signed.toHash()}`);
+      console.log("Waiting for confirmation...");
+
+      await lucid.awaitTx(signed.toHash());
+    }
+
     const genesisFile = Deno.readTextFileSync(
       `genesis/${preview ? "preview" : "mainnet"}.json`,
     );
@@ -146,85 +225,9 @@ const mine = new Command()
       incrementU8Array(nonce);
 
       targetState.fields[0] = toHex(nonce);
+
+      await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress);
     }
-
-    const realTimeNow = Number((Date.now() / 1000).toFixed(0)) * 1000 - 60000;
-
-    const interlink = calculateInterlink(toHex(targetHash), difficulty, {
-      leadingZeros: state.fields[2] as bigint,
-      difficulty_number: state.fields[3] as bigint,
-    }, state.fields[7] as string[]);
-
-    let epoch_time = (state.fields[4] as bigint) + BigInt(90000 + realTimeNow) -
-      (state.fields[5] as bigint);
-
-    let difficulty_number = state.fields[3] as bigint;
-    let leading_zeros = state.fields[2] as bigint;
-
-    if (
-      state.fields[0] as bigint % 2016n === 0n && state.fields[0] as bigint > 0
-    ) {
-      const adjustment = getDifficultyAdjustement(epoch_time, 1_209_600_000n);
-
-      epoch_time = 0n;
-
-      const new_difficulty = calculateDifficultyNumber(
-        {
-          leadingZeros: state.fields[2] as bigint,
-          difficulty_number: state.fields[3] as bigint,
-        },
-        adjustment.numerator,
-        adjustment.denominator,
-      );
-
-      difficulty_number = new_difficulty.difficulty_number;
-      leading_zeros = new_difficulty.leadingZeros;
-    }
-
-    // calculateDifficultyNumber();
-
-    const postDatum = new Constr(0, [
-      (state.fields[0] as bigint) + 1n,
-      toHex(targetHash),
-      leading_zeros,
-      difficulty_number,
-      epoch_time,
-      BigInt(90000 + realTimeNow),
-      0n,
-      interlink,
-    ]);
-
-    const outDat = Data.to(postDatum);
-
-    console.log(`Found next datum: ${outDat}`);
-
-    const mintTokens = { [validatorHash + fromText("TUNA")]: 5000000000n };
-    const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
-
-    const readUtxo = await lucid.utxosByOutRef([{
-      txHash:
-        "44732090c80e3c80f99e91f66fbbf5512c605d865276011089985517e0c7cf56",
-      outputIndex: 0,
-    }]);
-
-    const txMine = await lucid
-      .newTx()
-      .collectFrom([validatorOutRef], Data.to(new Constr(1, [toHex(nonce)])))
-      .payToAddressWithData(validatorAddress, { inline: outDat }, masterToken)
-      .mintAssets(mintTokens, Data.to(new Constr(0, [])))
-      .readFrom(readUtxo)
-      .validTo(realTimeNow + 180000)
-      .validFrom(realTimeNow)
-      .complete();
-
-    const signed = await txMine.sign().complete();
-
-    await signed.submit();
-
-    console.log(`TX HASH: ${signed.toHash()}`);
-    console.log("Waiting for confirmation...");
-
-    await lucid.awaitTx(signed.toHash());
   });
 
 const genesis = new Command()
