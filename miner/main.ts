@@ -53,15 +53,14 @@ const mine = new Command()
 
     lucid.selectWalletFromSeed(Deno.readTextFileSync("seed.txt"));
 
-    const validatorUTXOs = await lucid.utxosAt(validatorAddress);
+    let lastBlockCheck = new Date();
 
-    const validatorOutRef = validatorUTXOs.find(
+    let validatorUTXOs = await lucid.utxosAt(validatorAddress);
+    let validatorOutRef = validatorUTXOs.find(
       (u) => u.assets[validatorHash + fromText("lord tuna")],
     )!;
-
-    const validatorState = validatorOutRef.datum!;
-
-    const state = Data.from(validatorState) as Constr<
+    let validatorState = validatorOutRef.datum!;
+    let state = Data.from(validatorState) as Constr<
       string | bigint | string[]
     >;
 
@@ -69,7 +68,7 @@ const mine = new Command()
 
     crypto.getRandomValues(nonce);
 
-    const targetState = new Constr(0, [
+    let targetState = new Constr(0, [
       // nonce: ByteArray
       toHex(nonce),
       // block_number: Int
@@ -93,6 +92,40 @@ const mine = new Command()
 
     console.log("Mining...");
     while (true) {
+      if (new Date().valueOf() - lastBlockCheck.valueOf() > 3000) {
+         console.log("Checking for new block...");
+
+         validatorUTXOs = await lucid.utxosAt(validatorAddress);
+         validatorOutRef = validatorUTXOs.find(
+            (u) => u.assets[validatorHash + fromText("lord tuna")],
+         )!;
+         validatorState = validatorOutRef.datum!;
+         state = Data.from(validatorState) as Constr<
+            string | bigint | string[]
+         >;
+
+         if (state.fields[0] != targetState.fields[0]) {
+            console.log("New block detected...");
+
+            crypto.getRandomValues(nonce);
+
+            targetState = new Constr(0, [
+                // nonce: ByteArray
+                toHex(nonce),
+                // block_number: Int
+                state.fields[0] as bigint,
+                // current_hash: ByteArray
+                state.fields[1] as bigint,
+                // leading_zeros: Int
+                state.fields[2] as bigint,
+                // difficulty_number: Int
+                state.fields[3] as bigint,
+                //epoch_time: Int
+                state.fields[4] as bigint,
+             ]);
+         }
+      }
+        
       targetHash = sha256(sha256(fromHex(Data.to(targetState))));
 
       difficulty = getDifficulty(targetHash);
