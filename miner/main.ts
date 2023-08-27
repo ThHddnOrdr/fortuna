@@ -100,9 +100,6 @@ const mine = new Command()
             (u) => u.assets[validatorHash + fromText("lord tuna")],
          )!;
 
-         console.log("Current datum: " + validatorState);
-         console.log("On-chain datum: " + validatorOutRef.datum!);
-
          if (validatorState !== validatorOutRef.datum!) {
             console.log("New block detected...");
 
