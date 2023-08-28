@@ -166,8 +166,6 @@ const mine = new Command()
     console.log("Mining...");
     while (true) {
       if (new Date().valueOf() - lastBlockCheck.valueOf() > 3000) {
-         console.log("Checking for new block...");
-
          validatorUTXOs = await lucid.utxosAt(validatorAddress);
          validatorOutRef = validatorUTXOs.find(
             (u) => u.assets[validatorHash + fromText("lord tuna")],
