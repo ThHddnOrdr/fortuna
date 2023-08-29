@@ -103,7 +103,7 @@ const mine = new Command()
 
       const signed = await txMine.sign().complete();
 
-      console.log(`Submitted TX: ${signed.toHash()}`);
+      console.log(`Submitting TX: ${signed.toHash()}...`);
 
       await signed.submit();
     }
@@ -172,7 +172,7 @@ const mine = new Command()
          )!;
 
          if (validatorState !== validatorOutRef.datum!) {
-            console.log("New block detected...");
+            console.log("New block detected.");
 
             validatorState = validatorOutRef.datum!;
             state = Data.from(validatorState) as Constr<
@@ -211,7 +211,9 @@ const mine = new Command()
         (leadingZeros == (state.fields[2] as bigint) &&
           difficulty_number < (state.fields[3] as bigint))
       ) {
-        postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo).catch((e) => console.log("Exception while submitting TX (input probably alread in mempool/on-chain)."));
+        postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo)
+           .then(() => console.log("TX submitted successfully."))
+           .catch(() => console.log("Exception while submitting TX (input probably alread in mempool/on-chain)."));
       }
 
       incrementU8Array(nonce);
