@@ -211,11 +211,7 @@ const mine = new Command()
         (leadingZeros == (state.fields[2] as bigint) &&
           difficulty_number < (state.fields[3] as bigint))
       ) {
-        try {
-          await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo);
-        } catch (e) {
-          console.log("Exception while submitting TX (input probably alread in mempool/on-chain).")
-        }
+        postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo).catch((e) => console.log("Exception while submitting TX (input probably alread in mempool/on-chain)."));
       }
 
       incrementU8Array(nonce);
