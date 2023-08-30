@@ -137,6 +137,9 @@ self.onmessage = async (e) => {
         }
 
         while (true) {
+            if (targetState === undefined)
+                continue;
+            
             let hashingSampleElapsedTime = new Date().valueOf() - hashingSample.date.valueOf();
             if (hashingSampleElapsedTime > 60000) {
                 log(`Datum/s: ${(hashingSample.count / (hashingSampleElapsedTime / 1000)).toFixed(0)}`);
