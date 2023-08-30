@@ -46,15 +46,15 @@ const multiMine = new Command()
     const workers = [];
 
     for (let i = 0; i < 12; i++) {
-        workers.push(new Worker(new URL("./miner.js", import.meta.url).href, { type: "module" }));
+        workers.push(new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" }));
     }
 
     workers.forEach((worker, index) => {
         worker.postMessage({
-          index,
-          validatorHash,
-          validatorAddress,
-          lucid
+          index: index,
+          validatorHash: validatorHash,
+          validatorAddress: validatorAddress,
+          lucid: lucid
         })
     });
   });
