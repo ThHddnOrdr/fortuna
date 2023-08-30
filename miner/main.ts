@@ -174,7 +174,7 @@ const mine = new Command()
          )!;
 
          if (validatorState !== validatorOutRef.datum!) {
-           console.log(`New block detected. (Current hash rate: ${(hashes / ((new Date().valueOf() - hashTimer.valueOf())/1000)).toFixed(0)}/s)`);
+           console.log(`New block detected. (Rate: ${(hashes / ((new Date().valueOf() - hashTimer.valueOf())/1000)).toFixed(0)} datum/s)`);
 
             validatorState = validatorOutRef.datum!;
             state = Data.from(validatorState) as Constr<
