@@ -24,6 +24,8 @@ type Genesis = {
   outRef: { txHash: string; index: number };
 };
 
+declare var latestDatum: string;
+
 const mine = new Command()
   .description("Start the multi-core miner")
   .env("KUPO_URL=<value:string>", "Kupo URL", { required: true })
@@ -43,7 +45,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    localStorage.setItem("latestDatum", "");
+    latestDatum = ""
     
     const workers = [];
 
@@ -63,7 +65,7 @@ const mine = new Command()
     });
 
     while (true) {
-      localStorage.setItem("latestDatum", `${Math.random()}`);
+      latestDatum = `${Math.random()}`;
 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
