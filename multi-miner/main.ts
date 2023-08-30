@@ -1,3 +1,4 @@
+import { loadSync } from "https://deno.land/std@0.199.0/dotenv/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 import {
   applyParamsToScript,
@@ -12,6 +13,8 @@ import {
   sha256,
   toHex,
 } from "https://deno.land/x/lucid@0.10.1/mod.ts";
+
+loadSync({ export: true, allowEmptyValues: true });
 
 type Genesis = {
   validator: string;
