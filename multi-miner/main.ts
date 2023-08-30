@@ -28,8 +28,9 @@ const mine = new Command()
   .description("Start the multi-core miner")
   .env("KUPO_URL=<value:string>", "Kupo URL", { required: true })
   .env("OGMIOS_URL=<value:string>", "Ogmios URL", { required: true })
+  .env("WORKERS_COUNT=<value:number>", "Workers Count", { required: true })
   .option("-p, --preview", "Use testnet")
-  .action(async ({ preview, ogmiosUrl, kupoUrl }) => {
+  .action(async ({ preview, workersCount, ogmiosUrl, kupoUrl }) => {
     const genesisFile = Deno.readTextFileSync(`genesis/${preview ? "preview" : "mainnet"}.json`);
     const { validatorHash, validatorAddress }: Genesis = JSON.parse(
       genesisFile,
@@ -45,7 +46,7 @@ const mine = new Command()
 
     const workers = [];
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < workersCount; i++) {
         workers.push(new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" }));
     }
 
@@ -73,7 +74,7 @@ const mine = new Command()
 
         workers.forEach((worker) => {
           worker.postMessage({
-            datum: validatorOutRef.datum!
+            validatorOutRef: validatorOutRef
           });
         });
         

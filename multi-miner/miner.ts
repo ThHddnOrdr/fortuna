@@ -13,11 +13,11 @@ import {
     toHex,
 } from "https://deno.land/x/lucid@0.10.1/mod.ts";
 
-let datum = "";
+let validatorOutRef: any = undefined;
 
 self.onmessage = async (e) => {
-    const updateDatum = (newDatum: string) => {
-        datum = newDatum;
+    const updateDatum = (validatorOutRef: any) => {
+        validatorOutRef = validatorOutRef;
     }
 
     const mine = async (index: number, validatorHash, validatorAddress, kupoUrl: string, ogmiosUrl: string, network: Network) => {
@@ -29,17 +29,16 @@ self.onmessage = async (e) => {
         const lucid = await Lucid.new(provider, network);
         lucid.selectWalletFromSeed(Deno.readTextFileSync("seed.txt"));
     
-        let validatorUTXOs = await lucid.utxosAt(validatorAddress);
-    
         while (true) {
-            log(`${datum}`);
-    
+            if (validatorOutRef !== undefined)
+                log(validatorOutRef.datum);
+
             await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
     
-    if (e.data.datum !== undefined) {
-        updateDatum(e.data.datum)
+    if (e.data.validatorOutRef !== undefined) {
+        updateDatum(e.data.validatorOutRef)
     } else {
         const {index, validatorHash, validatorAddress, kupoUrl, ogmiosUrl, network} = e.data;
 
