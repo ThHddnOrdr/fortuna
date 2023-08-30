@@ -1,4 +1,4 @@
-self.onMessage(async function (e) {
+self.onmessage = async (e) => {
     const {index, validatorHash, validatorAddress, lucid} = e;
 
     console.log(`Worker ${index}: Starting...`)
