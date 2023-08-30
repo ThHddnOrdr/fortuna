@@ -44,7 +44,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    const workers = [];
+    const workers: Worker[] = [];
 
     let validatorUTXOs = await lucid.utxosAt(validatorAddress);
     let validatorOutRef = validatorUTXOs.find(
@@ -53,24 +53,26 @@ const mine = new Command()
     let datum: string = validatorOutRef.datum!;
 
     for (let i = 0; i < workersCount; i++) {
-      workers.push(new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" }));
-    }
+      let worker: Worker = new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" });
 
-    workers.forEach((worker, index) => {
       worker.postMessage({
         validatorOutRef: validatorOutRef,
         readUtxo: readUtxo
       });
 
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       worker.postMessage({
-        index: index,
+        index: i,
         validatorHash: validatorHash,
         validatorAddress: validatorAddress,
         kupoUrl: kupoUrl,
         ogmiosUrl: ogmiosUrl,
         network: preview ? "Preview" : "Mainnet"
       });
-    });
+
+      workers.push(worker);
+    }
 
     while (true) {
       validatorUTXOs = await lucid.utxosAt(validatorAddress);

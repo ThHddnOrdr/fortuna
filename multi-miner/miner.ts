@@ -1,14 +1,11 @@
 import {
-    applyParamsToScript,
     Constr,
     Data,
     fromHex,
     fromText,
-    generateSeedPhrase,
     Kupmios,
     Lucid,
     Network,
-    Script,
     sha256,
     toHex,
 } from "https://deno.land/x/lucid@0.10.1/mod.ts";
@@ -18,7 +15,6 @@ import {
     getDifficulty,
     getDifficultyAdjustement,
     incrementU8Array,
-    readValidator,
 } from "./utils.ts";
 
 let validatorOutRef: any = undefined;
