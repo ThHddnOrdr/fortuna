@@ -107,7 +107,7 @@ self.onmessage = async (e) => {
 
             const outDat = Data.to(postDatum);
 
-            console.log(`Found next datum: ${outDat}`);
+            log(`Found next datum: ${outDat}`);
 
             const mintTokens = { [validatorHash + fromText("TUNA")]: 5000000000n };
             const masterToken = { [validatorHash + fromText("lord tuna")]: 1n };
@@ -124,7 +124,7 @@ self.onmessage = async (e) => {
 
             const signed = await txMine.sign().complete();
 
-            console.log(`Submitting TX: ${signed.toHash()}...`);
+            log(`Submitting TX: ${signed.toHash()}...`);
 
             await signed.submit();
         }
@@ -141,6 +141,16 @@ self.onmessage = async (e) => {
         }
 
         while (true) {
+            let hashingSampleElapsedTime = new Date().valueOf() - hashingSample.date.valueOf();
+            if (hashingSampleElapsedTime > 60000) {
+                log(`Datum/s: ${(hashingSample.count / (hashingSampleElapsedTime / 1000)).toFixed(0)}`);
+
+                hashingSample = {
+                    date: new Date(),
+                    count: 0
+                };
+            }
+
             targetHash = sha256(sha256(fromHex(Data.to(targetState))));
 
             difficulty = getDifficulty(targetHash);
@@ -155,9 +165,9 @@ self.onmessage = async (e) => {
                 try {
                     await postMineTx(targetHash, difficulty, state, validatorHash, lucid, validatorOutRef, validatorAddress, readUtxo);
 
-                    console.log("TX submitted successfully.")
+                    log("TX submitted successfully.")
                 } catch (e) {
-                    console.log("Exception while submitting TX (input probably already in mempool/on-chain).")
+                    log("Exception while submitting TX (input probably already in mempool/on-chain).")
                 }
             }
 
