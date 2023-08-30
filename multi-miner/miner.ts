@@ -26,7 +26,7 @@ self.onmessage = async (e) => {
     let validatorUTXOs = await lucid.utxosAt(validatorAddress);
 
     while (true) {
-        log(`${window.latestDatum}`);
+        log(`${latestDatum}`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
