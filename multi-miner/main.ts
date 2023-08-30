@@ -43,7 +43,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    window.globalWorkersState = {
+    globalThis.globalWorkersState = {
       newestDatum: ""
     };
     
@@ -65,7 +65,7 @@ const mine = new Command()
     });
 
     while (true) {
-      window.globalWorkersState.newestDatum = `${Math.random()}`;
+      globalThis.globalWorkersState.newestDatum = `${Math.random()}`;
 
       await new Promise(resolve => setTimeout(resolve, 1000));
   }
