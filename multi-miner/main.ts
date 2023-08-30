@@ -43,7 +43,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    Deno.miner = {newestDatum:""}
+    localStorage.setItem("latestDatum", "");
     
     const workers = [];
 
@@ -63,10 +63,10 @@ const mine = new Command()
     });
 
     while (true) {
-      Deno.miner.newestDatum = `${Math.random()}`;
+      localStorage.setItem("latestDatum", `${Math.random()}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
-  }
+    }
   });
 
 await new Command()
