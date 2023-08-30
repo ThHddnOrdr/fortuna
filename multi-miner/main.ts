@@ -42,6 +42,10 @@ const mine = new Command()
       txHash: "01751095ea408a3ebe6083b4de4de8a24b635085183ab8a2ac76273ef8fff5dd",
       outputIndex: 0,
     }]);
+
+    const globalWorkersState = {
+      newestDatum: ""
+    };
     
     const workers = [];
 
@@ -50,17 +54,22 @@ const mine = new Command()
     }
 
     workers.forEach((worker, index) => {
-      worker.log = (message: string) => { console.log(message); }
-      
       worker.postMessage({
         index: index,
         validatorHash: validatorHash,
         validatorAddress: validatorAddress,
         kupoUrl: kupoUrl, 
         ogmiosUrl: ogmiosUrl,
-        network: preview ? "Preview" : "Mainnet"
+        network: preview ? "Preview" : "Mainnet",
+        globalWorkersState: globalWorkersState
       });
     });
+
+    while (true) {
+      globalWorkersState.newestDatum = `${Math.random()}`;
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  }
   });
 
 await new Command()
