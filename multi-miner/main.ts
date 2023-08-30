@@ -24,7 +24,7 @@ type Genesis = {
   outRef: { txHash: string; index: number };
 };
 
-const multiMine = new Command()
+const mine = new Command()
   .description("Start the multi-core miner")
   .env("KUPO_URL=<value:string>", "Kupo URL", { required: true })
   .env("OGMIOS_URL=<value:string>", "Ogmios URL", { required: true })
@@ -50,14 +50,16 @@ const multiMine = new Command()
     }
 
     workers.forEach((worker, index) => {
-        worker.postMessage({
-          index: index,
-          validatorHash: validatorHash,
-          validatorAddress: validatorAddress,
-          kupoUrl: kupoUrl, 
-          ogmiosUrl: ogmiosUrl,
-          network: preview ? "Preview" : "Mainnet"
-        })
+      worker.log = (message: string) => { console.log(message); }
+      
+      worker.postMessage({
+        index: index,
+        validatorHash: validatorHash,
+        validatorAddress: validatorAddress,
+        kupoUrl: kupoUrl, 
+        ogmiosUrl: ogmiosUrl,
+        network: preview ? "Preview" : "Mainnet"
+      });
     });
   });
 
@@ -65,5 +67,5 @@ await new Command()
   .name("fortuna")
   .description("Fortuna multi-core miner")
   .version("0.0.1")
-  .command("multi-mine", multiMine)
+  .command("mine", mine)
   .parse(Deno.args);
