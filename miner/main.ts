@@ -127,6 +127,8 @@ const mine = new Command()
     }]);
 
     let lastBlockCheck = new Date();
+    let hashTimer = new Date();
+    let hashes = 0;
 
     let validatorUTXOs = await lucid.utxosAt(validatorAddress);
     let validatorOutRef = validatorUTXOs.find(
@@ -172,7 +174,7 @@ const mine = new Command()
          )!;
 
          if (validatorState !== validatorOutRef.datum!) {
-            console.log("New block detected.");
+           console.log(`New block detected. (Current hash rate: ${(hashes / ((new Date().valueOf() - hashTimer.valueOf())/1000))}/s)`);
 
             validatorState = validatorOutRef.datum!;
             state = Data.from(validatorState) as Constr<
@@ -195,6 +197,9 @@ const mine = new Command()
                 //epoch_time: Int
                 state.fields[4] as bigint,
              ]);
+
+            hashes = 0;
+            hashTimer = new Date();
          }
 
          lastBlockCheck = new Date();
