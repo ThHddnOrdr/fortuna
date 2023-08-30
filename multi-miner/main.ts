@@ -55,12 +55,12 @@ const mine = new Command()
     for (let i = 0; i < workersCount; i++) {
       let worker: Worker = new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" });
 
+      await new Promise(resolve => setTimeout(resolve, 10000)); // Weird bug that onmessage isn't available
+
       worker.postMessage({
         validatorOutRef: validatorOutRef,
         readUtxo: readUtxo
       });
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
       worker.postMessage({
         index: i,
