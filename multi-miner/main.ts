@@ -54,6 +54,8 @@ const mine = new Command()
     }
 
     workers.forEach((worker, index) => {
+      worker.getGlobalWorkersState = () => globalWorkersState;
+      
       worker.postMessage({
         index: index,
         validatorHash: validatorHash,
