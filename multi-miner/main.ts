@@ -43,9 +43,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    globalThis.globalWorkersState = {
-      newestDatum: ""
-    };
+    Deno.miner = {newestDatum:""}
     
     const workers = [];
 
@@ -65,7 +63,7 @@ const mine = new Command()
     });
 
     while (true) {
-      globalThis.globalWorkersState.newestDatum = `${Math.random()}`;
+      Deno.miner.newestDatum = `${Math.random()}`;
 
       await new Promise(resolve => setTimeout(resolve, 1000));
   }
