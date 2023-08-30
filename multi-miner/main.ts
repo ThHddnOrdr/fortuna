@@ -46,27 +46,36 @@ const mine = new Command()
 
     const workers = [];
 
+    let validatorUTXOs = await lucid.utxosAt(validatorAddress);
+    let validatorOutRef = validatorUTXOs.find(
+      (u) => u.assets[validatorHash + fromText("lord tuna")],
+    )!;
+    let datum: string = validatorOutRef.datum!;
+
     for (let i = 0; i < workersCount; i++) {
-        workers.push(new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" }));
+      workers.push(new Worker(new URL("./miner.ts", import.meta.url).href, { type: "module" }));
     }
 
     workers.forEach((worker, index) => {
       worker.postMessage({
+        validatorOutRef: validatorOutRef,
+        readUtxo: readUtxo
+      });
+
+      worker.postMessage({
         index: index,
         validatorHash: validatorHash,
         validatorAddress: validatorAddress,
-        kupoUrl: kupoUrl, 
+        kupoUrl: kupoUrl,
         ogmiosUrl: ogmiosUrl,
         network: preview ? "Preview" : "Mainnet"
       });
     });
 
-    let datum: string = "";
-
     while (true) {
-      let validatorUTXOs = await lucid.utxosAt(validatorAddress);
-      let validatorOutRef = validatorUTXOs.find(
-         (u) => u.assets[validatorHash + fromText("lord tuna")],
+      validatorUTXOs = await lucid.utxosAt(validatorAddress);
+      validatorOutRef = validatorUTXOs.find(
+        (u) => u.assets[validatorHash + fromText("lord tuna")],
       )!;
 
       if (datum !== validatorOutRef.datum!) {
@@ -77,11 +86,11 @@ const mine = new Command()
             validatorOutRef: validatorOutRef
           });
         });
-        
+
         datum = validatorOutRef.datum!;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 250));
     }
   });
 
