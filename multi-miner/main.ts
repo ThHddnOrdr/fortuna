@@ -24,8 +24,6 @@ type Genesis = {
   outRef: { txHash: string; index: number };
 };
 
-var latestDatum: string;
-
 const mine = new Command()
   .description("Start the multi-core miner")
   .env("KUPO_URL=<value:string>", "Kupo URL", { required: true })
@@ -45,8 +43,6 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    latestDatum = ""
-    
     const workers = [];
 
     for (let i = 0; i < 12; i++) {
@@ -64,14 +60,25 @@ const mine = new Command()
       });
     });
 
-    while (true) {
-      latestDatum = `${Math.random()}`;
+    let datum: string = "";
 
-      workers.forEach((worker) => {
-        worker.postMessage({
-          latestDatum: latestDatum
+    while (true) {
+      let validatorUTXOs = await lucid.utxosAt(validatorAddress);
+      let validatorOutRef = validatorUTXOs.find(
+         (u) => u.assets[validatorHash + fromText("lord tuna")],
+      )!;
+
+      if (datum !== validatorOutRef.datum!) {
+        console.log(`New datum: ${validatorOutRef.datum!}.`);
+
+        workers.forEach((worker) => {
+          worker.postMessage({
+            datum: validatorOutRef.datum!
+          });
         });
-      });
+        
+        datum = validatorOutRef.datum!;
+      }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
