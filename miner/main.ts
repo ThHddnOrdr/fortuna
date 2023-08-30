@@ -228,6 +228,8 @@ const mine = new Command()
       incrementU8Array(nonce);
 
       targetState.fields[0] = toHex(nonce);
+
+      hashes++;
     }
   });
 
