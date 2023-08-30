@@ -12,7 +12,14 @@ import {
     toHex,
   } from "https://deno.land/x/lucid@0.10.1/mod.ts";
 
+let latestDatum = "";
+
 self.onmessage = async (e) => {
+    if (e.data.latestDatum !== undefined) {
+        latestDatum = e.data.latestDatum;
+        return;
+    } 
+
     const {index, validatorHash, validatorAddress, kupoUrl, ogmiosUrl, network} = e.data;
 
     const log = (message: string) => console.log(`Worker ${index}: ${message}`)

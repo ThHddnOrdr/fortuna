@@ -67,6 +67,12 @@ const mine = new Command()
     while (true) {
       latestDatum = `${Math.random()}`;
 
+      workers.forEach((worker) => {
+        worker.postMessage({
+          latestDatum: latestDatum
+        });
+      });
+
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   });
