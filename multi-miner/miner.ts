@@ -13,7 +13,7 @@ import {
   } from "https://deno.land/x/lucid@0.10.1/mod.ts";
 
 self.onmessage = async (e) => {
-    const {index, validatorHash, validatorAddress, kupoUrl, ogmiosUrl, network, globalWorkersState} = e.data;
+    const {index, validatorHash, validatorAddress, kupoUrl, ogmiosUrl, network} = e.data;
 
     const log = (message: string) => console.log(`Worker ${index}: ${message}`)
 
@@ -26,7 +26,7 @@ self.onmessage = async (e) => {
     let validatorUTXOs = await lucid.utxosAt(validatorAddress);
 
     while (true) {
-        log(`${self.getGlobalWorkersState().newestDatum}`);
+        log(`${window.globalWorkersState.newestDatum}`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
     }

@@ -43,7 +43,7 @@ const mine = new Command()
       outputIndex: 0,
     }]);
 
-    const globalWorkersState = {
+    window.globalWorkersState = {
       newestDatum: ""
     };
     
@@ -54,21 +54,18 @@ const mine = new Command()
     }
 
     workers.forEach((worker, index) => {
-      worker.getGlobalWorkersState = () => globalWorkersState;
-      
       worker.postMessage({
         index: index,
         validatorHash: validatorHash,
         validatorAddress: validatorAddress,
         kupoUrl: kupoUrl, 
         ogmiosUrl: ogmiosUrl,
-        network: preview ? "Preview" : "Mainnet",
-        globalWorkersState: globalWorkersState
+        network: preview ? "Preview" : "Mainnet"
       });
     });
 
     while (true) {
-      globalWorkersState.newestDatum = `${Math.random()}`;
+      window.globalWorkersState.newestDatum = `${Math.random()}`;
 
       await new Promise(resolve => setTimeout(resolve, 1000));
   }
