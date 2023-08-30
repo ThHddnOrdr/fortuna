@@ -54,7 +54,9 @@ const multiMine = new Command()
           index: index,
           validatorHash: validatorHash,
           validatorAddress: validatorAddress,
-          lucid: lucid
+          kupoUrl: kupoUrl, 
+          ogmiosUrl: ogmiosUrl,
+          network: preview ? "Preview" : "Mainnet"
         })
     });
   });
