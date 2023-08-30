@@ -24,7 +24,7 @@ type Genesis = {
   outRef: { txHash: string; index: number };
 };
 
-declare var latestDatum: string;
+var latestDatum: string;
 
 const mine = new Command()
   .description("Start the multi-core miner")
